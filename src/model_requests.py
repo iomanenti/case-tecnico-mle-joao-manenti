@@ -46,4 +46,4 @@ def get_prediction_history():
 
 # Running the API
 if __name__ == "__main__":
-    predict_model()
+    get_prediction_history()
