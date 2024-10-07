@@ -5,6 +5,9 @@ FROM python:3.9-slim
 WORKDIR /src
 
 # Copy the requirements file into the container
+COPY requirements.txt .
+
+# Copy the requirements file into the container
 COPY ./src /src
 
 # Install the dependencies
