@@ -1,4 +1,5 @@
 fastapi
 uvicorn
-pytest
-mongomock
+pydantic
+numpy
+requests

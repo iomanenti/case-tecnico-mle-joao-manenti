@@ -1,12 +1,17 @@
 import pickle
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel
 import numpy as np
+import json
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
 # Global variable to store the model data (coefficients and intercept)
 model_data = None
+
+# Global variable to store the path of the history file
+history_file_path = "prediction_history.json"
 
 class FlightPayload(BaseModel):
     year: int
@@ -40,8 +45,7 @@ async def load_model(file: UploadFile = File(...)):
     global model_data
     model_data = pickle.loads(await file.read())
         
-    return {"message": "Model loaded successfully"}
-
+    return JSONResponse(content={"message": "Model loaded successfully"}, status_code=200)
 
 @app.post("/model/predict/")
 def predict(payload: FlightPayload):
@@ -49,7 +53,7 @@ def predict(payload: FlightPayload):
     Endpoint to make predictions using the loaded model data (coefficients and intercept).
     """
     if model_data is None:
-        return {"error": "Model not loaded"}
+        raise HTTPException(status_code=400, detail="Model not loaded")
 
     # Prepare features as a list of numeric values based on the payload
     features = np.array([[
@@ -70,15 +74,34 @@ def predict(payload: FlightPayload):
     # Convert prediction (which is a NumPy array) to a Python list
     prediction_value = prediction.tolist()
 
-    return {"prediction": prediction_value}
+    # Save the payload and prediction to the history file
+    with open(history_file_path, "a") as history_file:
+        history_entry = {
+            "payload": payload.dict(),
+            "prediction": prediction_value
+        }
+        history_file.write(json.dumps(history_entry) + "\n")
 
+    return JSONResponse(content={"prediction": prediction_value}, status_code=200)
+
+@app.post("/model/history/")
+def get_history():
+    """
+    Endpoint to retrieve the prediction history.
+    """
+    try:
+        with open(history_file_path, "r") as history_file:
+            history = [json.loads(line) for line in history_file]
+        return JSONResponse(content={"history": history}, status_code=200)
+    except FileNotFoundError:
+        return JSONResponse(content={"history": []}, status_code=200)
 
 @app.get("/health/")
 def health_check():
     """
     Health check endpoint.
     """
-    return {"status": "API is running"}
+    return JSONResponse(content={"status": "API is running"}, status_code=200)
 
 # Running the API
 if __name__ == "__main__":
