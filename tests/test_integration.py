@@ -12,7 +12,7 @@ def test_health():
 class TestModelLoad(unittest.TestCase):
     def test_load_model(self):
         
-        with open("C:/models/linear_regression_model_flight_delay_prediction.pkl", "rb") as model_file:
+        with open("models/linear_regression_model_flight_delay_prediction.pkl", "rb") as model_file:
             response = client.post("/model/load/", files={"file": model_file})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["message"], "Model loaded successfully")

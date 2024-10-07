@@ -2,7 +2,7 @@ import requests
 
 def load_model():
     url = "http://localhost:8000/model/load/"
-    file_path = "C:/models/linear_regression_model_flight_delay_prediction.pkl"
+    file_path = "models/linear_regression_model_flight_delay_prediction.pkl"
     with open(file_path, "rb") as f:
         files = {"file": f}
         response = requests.post(url, files=files)
