@@ -44,6 +44,21 @@ def get_prediction_history():
     else:
         print("Error:", response.status_code, response.text)
 
+def check_health():
+    url = "http://127.0.0.1:8000/health/"
+    response = requests.get(url)
+    if response.status_code == 200:
+        print("Health Check:", response.json())
+    else:
+        print("Error:", response.status_code, response.text)
+
 # Running the API
 if __name__ == "__main__":
+    print("\n*********** Loading Model ***********\n")
+    load_model()
+    print("\n*********** Running Model Requests ***********\n")
+    predict_model()
+    print("\n*********** Getting Model History ***********\n")
     get_prediction_history()
+    print("\n*********** Checking API Health ***********\n")
+    check_health()
